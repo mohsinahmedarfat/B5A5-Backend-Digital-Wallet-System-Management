@@ -1,26 +1,35 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import httpStatus from "http-status-codes";
 import { UserServices } from "./user.service";
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
 
-const createUser = async (req: Request, res: Response) => {
-  try {
-    const user = await UserServices.createUser(req.body);
+const createUser = catchAsync(async (req: Request, res: Response) => {
+  const user = await UserServices.createUser(req.body);
 
-    res.status(httpStatus.CREATED).json({
-      success: true,
-      message: "User created successfully!",
-      user,
-    });
-  } catch (error: any) {
-    console.log(error);
-    res.status(httpStatus.BAD_REQUEST).json({
-      message: `Something went wrong!! ${error.message}`,
-      error,
-    });
-  }
-};
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "User created successfully!",
+    data: user,
+  });
+});
+
+const getUsers = catchAsync(async (req: Request, res: Response) => {
+  const users = await UserServices.getUsers();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Users retrieved successfully!",
+    data: users,
+    meta: {
+      total: users.length,
+    },
+  });
+});
 
 export const UserControllers = {
   createUser,
+  getUsers,
 };
