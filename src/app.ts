@@ -15,7 +15,7 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to Digital Wallet System Management.");
 });
 
-app.use(globalErrorHandler);
 app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;
