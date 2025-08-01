@@ -4,6 +4,7 @@ export enum Role {
   USER = "USER",
   AGENT = "AGENT",
   ADMIN = "ADMIN",
+  SUPER_ADMIN = "SUPER_ADMIN",
 }
 
 export interface IAuthProvider {
