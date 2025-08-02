@@ -80,8 +80,6 @@ const googleCallback = catchAsync(
     }
 
     const user = req.user;
-    console.log("user from google callback", user);
-
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, "User not found!");
     }

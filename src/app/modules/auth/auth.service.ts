@@ -8,9 +8,6 @@ import {
   createNewAccessTokenWithRefreshToken,
   createUserTokens,
 } from "../../utils/userTokens";
-import { JwtPayload } from "jsonwebtoken";
-import envVars from "../../config/env";
-import { verifyToken } from "../../utils/jwt";
 
 const credentialsLogin = async (payload: Partial<IUser>) => {
   const { email, password } = payload;
@@ -18,6 +15,15 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
   const isUserExist = await User.findOne({ email }).select("+password");
   if (!isUserExist) {
     throw new AppError(httpStatus.BAD_REQUEST, "Email does not exist!");
+  }
+
+  if(isUserExist.isBlocked) {
+    throw new AppError(httpStatus.FORBIDDEN, "User is blocked!");
+  }
+
+  // if agent is suspended, it can't login
+  if (isUserExist.approvalStatus === "SUSPENDED") {
+    throw new AppError(httpStatus.FORBIDDEN, "Agent is suspended! Contact admin.");
   }
 
   const isPasswordMatch = await bcrypt.compare(
