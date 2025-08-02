@@ -5,6 +5,7 @@ import httpStatus from "http-status-codes";
 import bcrypt from "bcryptjs";
 import { JwtPayload } from "jsonwebtoken";
 import envVars from "../../config/env";
+import { Wallet } from "../wallet/wallet.model";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
@@ -31,6 +32,17 @@ const createUser = async (payload: Partial<IUser>) => {
     auth: [authProvider],
     ...rest,
   });
+
+  // Create wallet and connect
+  const wallet = await Wallet.create({ user: user._id });
+
+  // Update user with wallet ID
+  user.wallet = wallet._id;
+  await user.save();
+
+  console.log("object from create user service", user);
+  console.log("wallet from create user service", wallet);
+
   return user;
 };
 
@@ -101,12 +113,6 @@ const updateUser = async (
       payload.role = Role.AGENT;
     }
   }
-
-
-  // if (payload.approvalStatus === "PENDING") {
-  //   // Normal user requests to become agent
-  //   payload.role = Role.USER; // still USER
-  // }
 
   // If the user is trying to update their own password, hash it
   if (payload.password) {
