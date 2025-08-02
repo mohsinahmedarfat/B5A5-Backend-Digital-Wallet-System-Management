@@ -4,8 +4,6 @@ import httpStatus from "http-status-codes";
 import { UserServices } from "./user.service";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { verifyToken } from "../../utils/jwt";
-import envVars from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
 
 const createUser = catchAsync(
@@ -43,7 +41,7 @@ const updateUser = catchAsync(
     const payload = req.body;
     const verifiedToken = req.user;
 
-    const user = await UserServices.updateUser(
+    const updateUser = await UserServices.updateUser(
       userId,
       payload,
       verifiedToken as JwtPayload
@@ -53,7 +51,7 @@ const updateUser = catchAsync(
       statusCode: httpStatus.CREATED,
       success: true,
       message: "User updated successfully!",
-      data: user,
+      data: updateUser,
     });
   }
 );
