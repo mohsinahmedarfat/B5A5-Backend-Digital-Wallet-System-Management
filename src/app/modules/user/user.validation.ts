@@ -1,5 +1,5 @@
 import z from "zod";
-import { Role } from "./user.interface";
+import { ApprovalStatus, Role } from "./user.interface";
 
 export const createZodSchema = z.object({
   name: z
@@ -66,9 +66,7 @@ export const updateZodSchema = z.object({
     .string({ error: "Address must be string" })
     .max(200, { message: "Address cannot exceed 200 characters." })
     .optional(),
-  role: z
-    .enum(Object.values(Role) as [string])
-    .default(Role.USER)
-    .optional(),
+  role: z.enum(Object.values(Role) as [string]).optional(),
+  approvalStatus: z.enum(Object.values(ApprovalStatus) as [string]).optional(),
   isBlocked: z.boolean({ error: "isBlocked must be true or false" }).optional(),
 });

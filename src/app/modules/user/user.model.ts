@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { IAuthProvider, IUser, Role } from "./user.interface";
+import { ApprovalStatus, IAuthProvider, IUser, Role } from "./user.interface";
 
 const authProviderSchema = new Schema<IAuthProvider>(
   {
@@ -16,7 +16,7 @@ const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, select: false }, // select: false => do not return password by default
+    password: { type: String, required: true, select: false }, // select: false => do not return password by default
     phone: { type: String, unique: true, sparse: true }, // sparse: true => allow unique constraint to be ignored if the field is not present
     picture: { type: String },
     address: { type: String },
@@ -24,6 +24,10 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: Object.values(Role), // "USER", "AGENT", "ADMIN"
       default: Role.USER,
+    },
+    approvalStatus: {
+      type: String,
+      enum: Object.values(ApprovalStatus), // "PENDING", "APPROVED", "SUSPENDED"
     },
     isBlocked: { type: Boolean, default: false },
     auths: [authProviderSchema], // array of auth providers

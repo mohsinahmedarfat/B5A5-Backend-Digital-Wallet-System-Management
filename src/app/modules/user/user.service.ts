@@ -1,5 +1,5 @@
 import AppError from "../../errorHelpers/appError";
-import { IAuthProvider, IUser, Role } from "./user.interface";
+import { ApprovalStatus, IAuthProvider, IUser, Role } from "./user.interface";
 import { User } from "./user.model";
 import httpStatus from "http-status-codes";
 import bcrypt from "bcryptjs";
@@ -44,11 +44,15 @@ const updateUser = async (
   payload: Partial<IUser>,
   decodedToken: JwtPayload
 ) => {
+  console.log("payload from update user service", payload);
+  console.log("decodedToken from update user service", decodedToken);
+
   const isUserExist = await User.findById(userId);
   if (!isUserExist) {
     throw new AppError(httpStatus.NOT_FOUND, "User not found!");
   }
 
+  // Check if the user is trying to update their own role or blocked status
   if (payload.role) {
     if (decodedToken.role === Role.USER || decodedToken.role === Role.AGENT) {
       throw new AppError(httpStatus.FORBIDDEN, "You are not authorized!");
@@ -59,12 +63,52 @@ const updateUser = async (
     }
   }
 
+  // Check if the user is trying to block or unblock themselves
   if (payload.isBlocked) {
     if (decodedToken.role === Role.USER || decodedToken.role === Role.AGENT) {
       throw new AppError(httpStatus.FORBIDDEN, "You are not authorized!");
     }
   }
 
+  // only current user can update their own information
+  if (
+    decodedToken.userId !== userId &&
+    decodedToken.role !== Role.SUPER_ADMIN &&
+    decodedToken.role !== Role.ADMIN
+  ) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You can only change your info. Not others!"
+    );
+    // throw new AppError(httpStatus.FORBIDDEN, "You are not authorized!");
+  }
+
+  // Check if the user is trying to change approval status
+  if (payload.approvalStatus) {
+    if (
+      payload.approvalStatus !== ApprovalStatus.PENDING &&
+      decodedToken.role === Role.USER
+    ) {
+      throw new AppError(
+        httpStatus.FORBIDDEN,
+        "You are not authorized to change approval status to APPROVED or SUSPENDED!"
+      );
+    }
+
+    // Auto-update role based on approvalStatus
+    if (payload.approvalStatus === "APPROVED" || payload.approvalStatus === "SUSPENDED") {
+      // Admin approves request
+      payload.role = Role.AGENT;
+    }
+  }
+
+
+  // if (payload.approvalStatus === "PENDING") {
+  //   // Normal user requests to become agent
+  //   payload.role = Role.USER; // still USER
+  // }
+
+  // If the user is trying to update their own password, hash it
   if (payload.password) {
     payload.password = await bcrypt.hash(
       payload.password,
