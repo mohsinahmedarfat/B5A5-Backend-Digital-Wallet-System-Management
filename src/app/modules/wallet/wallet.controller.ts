@@ -26,7 +26,7 @@ const topUpWallet = catchAsync(
     const verifiedToken = req.user;
 
     // Call service to top up wallet
-    const updatedWallet = await WalletServices.topUpWallet(
+    const result = await WalletServices.topUpWallet(
       userId,
       amount,
       verifiedToken as JwtPayload
@@ -36,7 +36,7 @@ const topUpWallet = catchAsync(
       success: true,
       statusCode: httpStatus.OK,
       message: "Wallet topped up successfully.",
-      data: updatedWallet,
+      data: result,
     });
   }
 );
