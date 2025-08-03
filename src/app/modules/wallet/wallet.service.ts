@@ -4,6 +4,8 @@ import { Role } from "../user/user.interface";
 import AppError from "../../errorHelpers/appError";
 import httpStatus from "http-status-codes";
 import { WalletStatus } from "./wallet.interface";
+import { Transaction } from "../transaction/transaction.model";
+import { TransactionType } from "../transaction/transaction.interface";
 
 const getWallets = async () => {
   // populate the user field with user details
@@ -27,6 +29,7 @@ const topUpWallet = async (
   if (!isWalletExist) {
     throw new Error("Wallet not found for the specified user.");
   }
+  console.log("isWalletExist from top up wallet service", isWalletExist);
 
   // Check if the wallet is blocked
   if (isWalletExist.status === "BLOCKED") {
@@ -54,7 +57,18 @@ const topUpWallet = async (
   isWalletExist.balance += amount;
   // Save the updated wallet
   const updatedWallet = await isWalletExist.save();
-  return updatedWallet;
+
+  const transaction = await Transaction.create({
+    initiator: isWalletExist.user,
+    type: TransactionType.TOP_UP,
+    amount,
+    description: `Top up of ${amount} to wallet`,
+  });
+
+  return {
+    updatedWallet,
+    transaction,
+  };
 };
 
 const sendWallet = async (
