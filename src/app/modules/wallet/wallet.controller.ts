@@ -41,6 +41,28 @@ const topUpWallet = catchAsync(
   }
 );
 
+const sendWallet = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const receiverId = req.params.receiverId;
+    const { amount } = req.body;
+    const verifiedToken = req.user;
+
+    // Call service to send from wallet
+    const result = await WalletServices.sendWallet(
+      receiverId,
+      amount,
+      verifiedToken as JwtPayload
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Wallet sent successfully.",
+      data: result,
+    });
+  }
+);
+
 const withdrawWallet = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.params.userId;
@@ -63,8 +85,32 @@ const withdrawWallet = catchAsync(
   }
 );
 
+const statusWallet = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.userId;
+    const { status } = req.body;
+    const verifiedToken = req.user;
+
+    // Call service to update wallet status
+    const updatedWallet = await WalletServices.statusWallet(
+      userId,
+      status,
+      verifiedToken as JwtPayload
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Wallet status updated successfully.",
+      data: updatedWallet,
+    });
+  }
+);
+
 export const WalletController = {
   getWallets,
   topUpWallet,
-  withdrawWallet
+  withdrawWallet,
+  statusWallet,
+  sendWallet
 };
