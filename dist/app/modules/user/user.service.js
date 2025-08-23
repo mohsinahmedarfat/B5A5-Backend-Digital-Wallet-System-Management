@@ -108,8 +108,15 @@ const updateUser = (userId, payload, decodedToken) => __awaiter(void 0, void 0, 
     });
     return newUpdateUser;
 });
+const getMe = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(userId).select("-password");
+    return {
+        data: user,
+    };
+});
 exports.UserServices = {
     createUser,
     getUsers,
     updateUser,
+    getMe
 };

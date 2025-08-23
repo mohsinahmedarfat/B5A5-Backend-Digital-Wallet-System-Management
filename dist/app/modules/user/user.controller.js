@@ -50,8 +50,19 @@ const updateUser = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 
         data: updateUser,
     });
 }));
+const getMe = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const decodedToken = req.user;
+    const result = yield user_service_1.UserServices.getMe(decodedToken.userId);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.CREATED,
+        message: "Your profile Retrieved Successfully",
+        data: result.data
+    });
+}));
 exports.UserControllers = {
     createUser,
     getUsers,
     updateUser,
+    getMe
 };

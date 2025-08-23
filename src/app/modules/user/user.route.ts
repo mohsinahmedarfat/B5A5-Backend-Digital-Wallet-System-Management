@@ -17,6 +17,8 @@ router.get(
   UserControllers.getUsers
 );
 
+router.get("/me", checkAuth(...Object.values(Role)), UserControllers.getMe);
+
 // /api/v1/user/:id
 router.patch(
   "/:id",
