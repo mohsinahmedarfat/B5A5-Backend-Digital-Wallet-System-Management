@@ -6,6 +6,7 @@ import httpStatus from "http-status-codes";
 import { WalletStatus } from "./wallet.interface";
 import { Transaction } from "../transaction/transaction.model";
 import { TransactionType } from "../transaction/transaction.interface";
+import { User } from "../user/user.model";
 
 const getWallets = async () => {
   // populate the user field with user details
@@ -84,7 +85,7 @@ const topUpWallet = async (
     recipient: userId,
     type: TransactionType.TOP_UP,
     amount,
-    description: `Top up of ${amount} to wallet`,
+    description: `Top up ${amount} to wallet`,
   });
 
   return {
@@ -101,6 +102,11 @@ const sendWallet = async (
 ) => {
   console.log("userId from send wallet service", receiverId);
   console.log("decodedToken from send wallet service", decodedToken);
+
+  const isUserExist = await User.findById(receiverId);
+  if (!isUserExist) {
+    throw new Error("User does not exist.");
+  }
 
   // Find the receiver wallet by receiverId
   const isReceiverWalletExist = await Wallet.findOne({ user: receiverId });
@@ -136,7 +142,22 @@ const sendWallet = async (
       httpStatus.FORBIDDEN,
       "You are not authorized! Only owner can send from their wallet!"
     );
-    // throw new AppError(httpStatus.FORBIDDEN, "You are not authorized!");
+  }
+
+  // user can not send money to agent
+  if (decodedToken.role === Role.USER && isUserExist.role === Role.AGENT) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "User can not send money to agent."
+    );
+  }
+
+  // agent can not send money to anyone
+  if (decodedToken.role === Role.AGENT) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "Agent can not send money to anyone."
+    );
   }
 
   // Validate amount
@@ -149,12 +170,21 @@ const sendWallet = async (
   isReceiverWalletExist.balance += amount;
 
   // Save the updated wallet
-  await isSenderWalletExist.save();
-  await isReceiverWalletExist.save();
+  const senderWallet = await isSenderWalletExist.save();
+  const receiverWallet = await isReceiverWalletExist.save();
+
+  const transaction = await Transaction.create({
+    initiator: senderId,
+    recipient: receiverId,
+    type: TransactionType.SEND,
+    amount,
+    description: `Send ${amount} to wallet`,
+  });
 
   return {
-    senderWallet: isSenderWalletExist,
-    receiverWallet: isReceiverWalletExist,
+    senderWallet,
+    receiverWallet,
+    transaction,
   };
 };
 
@@ -225,7 +255,7 @@ const withdrawWallet = async (
     recipient: agentId,
     type: TransactionType.WITHDRAW,
     amount,
-    description: `Withdraw of ${amount} to wallet`,
+    description: `Withdraw ${amount} to wallet`,
   });
 
   return {
@@ -234,48 +264,6 @@ const withdrawWallet = async (
     transaction,
   };
 };
-
-// const withdrawWallet = async (
-//   userId: string,
-//   amount: number,
-//   decodedToken: JwtPayload
-// ) => {
-//   console.log("userId from withdraw wallet service", userId);
-//   console.log("decodedToken from withdraw wallet service", decodedToken);
-
-//   // Find the wallet by userId
-//   const isWalletExist = await Wallet.findOne({ user: userId });
-//   if (!isWalletExist) {
-//     throw new Error("Wallet not found for the specified user.");
-//   }
-
-//   // Check if the wallet is blocked
-//   if (isWalletExist.status === "BLOCKED") {
-//     throw new AppError(
-//       httpStatus.FORBIDDEN,
-//       "Wallet is blocked. Cannot withdraw."
-//     );
-//   }
-
-//   // only current user can update their own information
-//   if (decodedToken.userId !== userId && decodedToken.role !== Role.AGENT) {
-//     throw new AppError(
-//       httpStatus.FORBIDDEN,
-//       "You are not authorized! Only owner or agents can withdraw from wallet!"
-//     );
-//   }
-
-//   // Validate amount
-//   if (amount <= 0 || amount > isWalletExist.balance) {
-//     throw new Error("Invalid withdrawal amount.");
-//   }
-
-//   // Update the wallet balance
-//   isWalletExist.balance -= amount;
-//   // Save the updated wallet
-//   const updatedWallet = await isWalletExist.save();
-//   return updatedWallet;
-// };
 
 const statusWallet = async (
   userId: string,
