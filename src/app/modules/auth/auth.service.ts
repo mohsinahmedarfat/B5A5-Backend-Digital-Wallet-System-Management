@@ -53,9 +53,6 @@ const getNewAccessToken = async (refreshToken: string) => {
   );
 
   return newAccessToken;
-  // return {
-  //   accessToken: newAccessToken,
-  // };
 };
 
 export const AuthServices = {

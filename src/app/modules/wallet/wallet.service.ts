@@ -24,15 +24,24 @@ const topUpWallet = async (
 ) => {
   console.log("userId from top up wallet service", userId);
   console.log("decodedToken from top up wallet service", decodedToken);
-  // Find the wallet by userId
-  const isWalletExist = await Wallet.findOne({ user: userId });
-  if (!isWalletExist) {
-    throw new Error("Wallet not found for the specified user.");
+
+// Find the receiver wallet by receiverId
+  const isReceiverWalletExist = await Wallet.findOne({ user: userId });
+  if (!isReceiverWalletExist) {
+    throw new Error("Receiver wallet not found.");
   }
-  console.log("isWalletExist from top up wallet service", isWalletExist);
+  console.log("isReceiverWalletExist from top up wallet service", isReceiverWalletExist);
+  
+
+  // Find the agent wallet by userId
+  const agentId = decodedToken.userId;
+  const isAgentWalletExist = await Wallet.findOne({ user: agentId });
+  if (!isAgentWalletExist) {
+    throw new Error("Agent wallet not found.");
+  }
 
   // Check if the wallet is blocked
-  if (isWalletExist.status === "BLOCKED") {
+  if (isReceiverWalletExist.status === "BLOCKED") {
     throw new AppError(
       httpStatus.FORBIDDEN,
       "Wallet is blocked. Cannot top up"
@@ -45,28 +54,53 @@ const topUpWallet = async (
       httpStatus.FORBIDDEN,
       "You are not authorized! Only owner or agents can top-up to wallet!"
     );
-    // throw new AppError(httpStatus.FORBIDDEN, "You are not authorized!");
+  }
+  
+  // agent (current user) can not update their wallet balance
+  if (decodedToken.userId === userId) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You can not update your wallet balance!"
+    );
   }
 
   // Validate amount
-  if (amount <= 0) {
-    throw new Error("Amount must be greater than zero.");
+  // if (amount <= 0) {
+  //   throw new Error("Amount must be greater than zero.");
+  // }
+  if (amount <= 0 || amount > isAgentWalletExist.balance) {
+    throw new Error("Invalid send amount.");
   }
 
+  // // Update the wallet balance
+  // isWalletExist.balance += amount;
+  // // Save the updated wallet
+  // const wallet = await isWalletExist.save();
+
+
+
+
+
+
   // Update the wallet balance
-  isWalletExist.balance += amount;
+  isAgentWalletExist.balance -= amount;
+  isReceiverWalletExist.balance += amount;
+
   // Save the updated wallet
-  const updatedWallet = await isWalletExist.save();
+  const agentWallet = await isAgentWalletExist.save();
+  const receiverWallet = await isReceiverWalletExist.save();
 
   const transaction = await Transaction.create({
-    initiator: isWalletExist.user,
+    initiator: agentId,
+    recipient: userId,
     type: TransactionType.TOP_UP,
     amount,
     description: `Top up of ${amount} to wallet`,
   });
 
   return {
-    updatedWallet,
+    agentWallet,
+    receiverWallet,
     transaction,
   };
 };
@@ -211,10 +245,21 @@ const statusWallet = async (
   return updatedWallet;
 };
 
+const getWalletMe = async (userId: string) => {
+  const wallet = await Wallet.findOne({ user: userId }).populate(
+    "user",
+    "name email role isBlocked"
+  );
+  return {
+    data: wallet,
+  };
+};
+
 export const WalletServices = {
   getWallets,
   topUpWallet,
   withdrawWallet,
   statusWallet,
   sendWallet,
+  getWalletMe,
 };

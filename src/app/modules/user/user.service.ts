@@ -130,6 +130,39 @@ const updateUser = async (
   return newUpdateUser;
 };
 
+const statusUser = async (
+  userId: string,
+  isBlocked: boolean,
+  decodedToken: JwtPayload
+) => {
+  console.log("userId from status User service", userId);
+  console.log("decodedToken from status User service", decodedToken);
+
+  // Find the User by userId
+  const isUserExist = await User.findById(userId);
+  if (!isUserExist) {
+    throw new Error("User not found for the specified user.");
+  }
+
+  // only admins can change the status of User
+  if (
+    decodedToken.role !== Role.ADMIN &&
+    decodedToken.role !== Role.SUPER_ADMIN
+  ) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You are not authorized! Only admins can change the User status!"
+    );
+  }
+
+  // Update the User status
+  isUserExist.isBlocked = isBlocked;
+
+  // Save the updated User
+  const updatedUser = await isUserExist.save();
+  return updatedUser;
+};
+
 const getMe = async (userId: string) => {
   const user = await User.findById(userId).select("-password");
   return {
@@ -141,5 +174,6 @@ export const UserServices = {
   createUser,
   getUsers,
   updateUser,
+  statusUser,
   getMe
 };

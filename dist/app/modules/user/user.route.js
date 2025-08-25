@@ -16,4 +16,5 @@ router.get("/all-users", (0, checkAuth_1.default)(user_interface_1.Role.ADMIN, u
 router.get("/me", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), user_controller_1.UserControllers.getMe);
 // /api/v1/user/:id
 router.patch("/:id", (0, validateRequest_1.default)(user_validation_1.updateZodSchema), (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), user_controller_1.UserControllers.updateUser);
+router.patch("/status/:userId", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), user_controller_1.UserControllers.statusUser);
 exports.UserRoutes = router;

@@ -50,6 +50,19 @@ const updateUser = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 
         data: updateUser,
     });
 }));
+const statusUser = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req.params.userId;
+    const { isBlocked } = req.body;
+    const verifiedToken = req.user;
+    // Call service to update User status
+    const updatedUser = yield user_service_1.UserServices.statusUser(userId, isBlocked, verifiedToken);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.OK,
+        message: "User status updated successfully.",
+        data: updatedUser,
+    });
+}));
 const getMe = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const decodedToken = req.user;
     const result = yield user_service_1.UserServices.getMe(decodedToken.userId);
@@ -64,5 +77,6 @@ exports.UserControllers = {
     createUser,
     getUsers,
     updateUser,
+    statusUser,
     getMe
 };

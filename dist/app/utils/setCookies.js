@@ -7,7 +7,7 @@ const setCookie = (res, tokenInfo) => {
             httpOnly: true,
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
-            path: "/"
+            path: "/",
         });
     }
     if (tokenInfo.refreshToken) {
@@ -15,7 +15,7 @@ const setCookie = (res, tokenInfo) => {
             httpOnly: true,
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
-            path: "/"
+            path: "/",
         });
     }
 };

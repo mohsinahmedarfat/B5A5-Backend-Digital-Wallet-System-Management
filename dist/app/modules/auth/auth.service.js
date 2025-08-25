@@ -58,9 +58,6 @@ const credentialsLogin = (payload) => __awaiter(void 0, void 0, void 0, function
 const getNewAccessToken = (refreshToken) => __awaiter(void 0, void 0, void 0, function* () {
     const newAccessToken = yield (0, userTokens_1.createNewAccessTokenWithRefreshToken)(refreshToken);
     return newAccessToken;
-    // return {
-    //   accessToken: newAccessToken,
-    // };
 });
 exports.AuthServices = {
     credentialsLogin,

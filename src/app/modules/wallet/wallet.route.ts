@@ -10,6 +10,8 @@ router.get(
   WalletController.getWallets
 );
 
+router.get("/me", checkAuth(...Object.values(Role)), WalletController.getWalletMe);
+
 router.patch(
   "/top-up/:userId",
   checkAuth(...Object.values(Role)),

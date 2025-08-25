@@ -6,16 +6,14 @@ interface AuthTokens {
 }
 
 const setCookie = (res: Response, tokenInfo: AuthTokens) => {
-
-    const isProd = process.env.NODE_ENV === "production";
-
+  const isProd = process.env.NODE_ENV === "production";
 
   if (tokenInfo.accessToken) {
     res.cookie("accessToken", tokenInfo.accessToken, {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      path: "/"
+      path: "/",
     });
   }
 
@@ -24,7 +22,7 @@ const setCookie = (res: Response, tokenInfo: AuthTokens) => {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      path: "/"
+      path: "/",
     });
   }
 };

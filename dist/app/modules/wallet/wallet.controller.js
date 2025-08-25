@@ -78,10 +78,21 @@ const statusWallet = (0, catchAsync_1.default)((req, res, next) => __awaiter(voi
         data: updatedWallet,
     });
 }));
+const getWalletMe = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const decodedToken = req.user;
+    const result = yield wallet_service_1.WalletServices.getWalletMe(decodedToken.userId);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.CREATED,
+        message: "Your Wallet Retrieved Successfully",
+        data: result.data
+    });
+}));
 exports.WalletController = {
     getWallets,
     topUpWallet,
     withdrawWallet,
     statusWallet,
-    sendWallet
+    sendWallet,
+    getWalletMe
 };

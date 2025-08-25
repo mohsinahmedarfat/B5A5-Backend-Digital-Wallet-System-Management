@@ -27,4 +27,10 @@ router.patch(
   UserControllers.updateUser
 );
 
+router.patch(
+  "/status/:userId",
+  checkAuth(...Object.values(Role)),
+  UserControllers.statusUser
+);
+
 export const UserRoutes = router;

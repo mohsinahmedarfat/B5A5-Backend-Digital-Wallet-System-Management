@@ -107,10 +107,24 @@ const statusWallet = catchAsync(
   }
 );
 
+const getWalletMe = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user as JwtPayload
+    const result = await WalletServices.getWalletMe(decodedToken.userId);
+
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.CREATED,
+        message: "Your Wallet Retrieved Successfully",
+        data: result.data
+    })
+})
+
 export const WalletController = {
   getWallets,
   topUpWallet,
   withdrawWallet,
   statusWallet,
-  sendWallet
+  sendWallet,
+  getWalletMe
 };

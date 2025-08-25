@@ -56,6 +56,28 @@ const updateUser = catchAsync(
   }
 );
 
+const statusUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.userId;
+    const { isBlocked } = req.body;
+    const verifiedToken = req.user;
+
+    // Call service to update User status
+    const updatedUser = await UserServices.statusUser(
+      userId,
+      isBlocked,
+      verifiedToken as JwtPayload
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User status updated successfully.",
+      data: updatedUser,
+    });
+  }
+);
+
 const getMe = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = req.user as JwtPayload
     const result = await UserServices.getMe(decodedToken.userId);
@@ -72,5 +94,6 @@ export const UserControllers = {
   createUser,
   getUsers,
   updateUser,
+  statusUser,
   getMe
 };

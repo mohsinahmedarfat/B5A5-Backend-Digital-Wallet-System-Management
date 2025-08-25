@@ -108,6 +108,25 @@ const updateUser = (userId, payload, decodedToken) => __awaiter(void 0, void 0, 
     });
     return newUpdateUser;
 });
+const statusUser = (userId, isBlocked, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("userId from status User service", userId);
+    console.log("decodedToken from status User service", decodedToken);
+    // Find the User by userId
+    const isUserExist = yield user_model_1.User.findById(userId);
+    if (!isUserExist) {
+        throw new Error("User not found for the specified user.");
+    }
+    // only admins can change the status of User
+    if (decodedToken.role !== user_interface_1.Role.ADMIN &&
+        decodedToken.role !== user_interface_1.Role.SUPER_ADMIN) {
+        throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized! Only admins can change the User status!");
+    }
+    // Update the User status
+    isUserExist.isBlocked = isBlocked;
+    // Save the updated User
+    const updatedUser = yield isUserExist.save();
+    return updatedUser;
+});
 const getMe = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.User.findById(userId).select("-password");
     return {
@@ -118,5 +137,6 @@ exports.UserServices = {
     createUser,
     getUsers,
     updateUser,
+    statusUser,
     getMe
 };
