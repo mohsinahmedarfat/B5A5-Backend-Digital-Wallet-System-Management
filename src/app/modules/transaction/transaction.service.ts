@@ -9,6 +9,21 @@ const getTransactions = async () => {
 
   return transactions;
 };
+
+const getTransactionMe = async (userId: string) => {
+  const transaction = await Transaction.find({ 
+    $or: [{initiator: userId}, {recipient: userId}]
+   }).populate(
+    "initiator recipient",
+    "email role"
+  );
+  return {
+    data: transaction,
+  };
+};
+
+
 export const TransactionServices = {
-    getTransactions
+    getTransactions,
+    getTransactionMe
 };

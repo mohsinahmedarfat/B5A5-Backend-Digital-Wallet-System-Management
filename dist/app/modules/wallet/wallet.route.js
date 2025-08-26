@@ -13,6 +13,6 @@ router.get("/", (0, checkAuth_1.default)(user_interface_1.Role.ADMIN, user_inter
 router.get("/me", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.getWalletMe);
 router.patch("/top-up/:userId", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.topUpWallet);
 router.patch("/withdraw/:userId", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.withdrawWallet);
-router.patch("/send/:receiverId", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.sendWallet);
+router.patch("/send/:receiverEmail", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.sendWallet);
 router.patch("/status/:userId", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.statusWallet);
 exports.WalletRoutes = router;

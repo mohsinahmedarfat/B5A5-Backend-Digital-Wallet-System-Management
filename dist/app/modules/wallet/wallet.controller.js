@@ -40,11 +40,12 @@ const topUpWallet = (0, catchAsync_1.default)((req, res, next) => __awaiter(void
     });
 }));
 const sendWallet = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const receiverId = req.params.receiverId;
+    // const receiverId = req.params.receiverId;
+    const receiverEmail = req.params.receiverEmail;
     const { amount } = req.body;
     const verifiedToken = req.user;
     // Call service to send from wallet
-    const result = yield wallet_service_1.WalletServices.sendWallet(receiverId, amount, verifiedToken);
+    const result = yield wallet_service_1.WalletServices.sendWallet(receiverEmail, amount, verifiedToken);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.default.OK,

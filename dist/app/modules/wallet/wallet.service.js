@@ -75,15 +75,18 @@ const topUpWallet = (userId, amount, decodedToken) => __awaiter(void 0, void 0, 
         transaction,
     };
 });
-const sendWallet = (receiverId, amount, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("userId from send wallet service", receiverId);
+const sendWallet = (
+// receiverId: string,
+receiverEmail, amount, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("userId from send wallet service", receiverEmail);
     console.log("decodedToken from send wallet service", decodedToken);
-    const isUserExist = yield user_model_1.User.findById(receiverId);
+    const isUserExist = yield user_model_1.User.findOne({ email: receiverEmail });
+    console.log(isUserExist);
     if (!isUserExist) {
         throw new Error("User does not exist.");
     }
     // Find the receiver wallet by receiverId
-    const isReceiverWalletExist = yield wallet_model_1.Wallet.findOne({ user: receiverId });
+    const isReceiverWalletExist = yield wallet_model_1.Wallet.findOne({ user: isUserExist._id });
     if (!isReceiverWalletExist) {
         throw new Error("Receiver wallet not found.");
     }
@@ -101,7 +104,7 @@ const sendWallet = (receiverId, amount, decodedToken) => __awaiter(void 0, void 
     if (isSenderWalletExist.status === "BLOCKED") {
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "Sender wallet is blocked. Cannot send.");
     }
-    if (senderId === receiverId && decodedToken.role !== user_interface_1.Role.USER) {
+    if (senderId === isUserExist._id && decodedToken.role !== user_interface_1.Role.USER) {
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized! Only owner can send from their wallet!");
     }
     // user can not send money to agent
@@ -124,7 +127,7 @@ const sendWallet = (receiverId, amount, decodedToken) => __awaiter(void 0, void 
     const receiverWallet = yield isReceiverWalletExist.save();
     const transaction = yield transaction_model_1.Transaction.create({
         initiator: senderId,
-        recipient: receiverId,
+        recipient: isUserExist._id,
         type: transaction_interface_1.TransactionType.SEND,
         amount,
         description: `Send ${amount} to wallet`,

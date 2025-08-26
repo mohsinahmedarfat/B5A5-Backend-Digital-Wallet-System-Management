@@ -9,4 +9,6 @@ router.get(
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   TransactionController.getTransactions
 );
+
+router.get("/me", checkAuth(...Object.values(Role)), TransactionController.getTransactionMe);
 export const TransactionRoutes = router;

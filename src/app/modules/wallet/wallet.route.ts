@@ -25,7 +25,7 @@ router.patch(
 );
 
 router.patch(
-  "/send/:receiverId",
+  "/send/:receiverEmail",
   checkAuth(...Object.values(Role)),
   WalletController.sendWallet
 );

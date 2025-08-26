@@ -96,20 +96,22 @@ const topUpWallet = async (
 };
 
 const sendWallet = async (
-  receiverId: string,
+  // receiverId: string,
+  receiverEmail: string,
   amount: number,
   decodedToken: JwtPayload
 ) => {
-  console.log("userId from send wallet service", receiverId);
+  console.log("userId from send wallet service", receiverEmail);
   console.log("decodedToken from send wallet service", decodedToken);
 
-  const isUserExist = await User.findById(receiverId);
+  const isUserExist = await User.findOne({email: receiverEmail});
+  console.log(isUserExist);
   if (!isUserExist) {
     throw new Error("User does not exist.");
   }
 
   // Find the receiver wallet by receiverId
-  const isReceiverWalletExist = await Wallet.findOne({ user: receiverId });
+  const isReceiverWalletExist = await Wallet.findOne({ user: isUserExist._id });
   if (!isReceiverWalletExist) {
     throw new Error("Receiver wallet not found.");
   }
@@ -137,7 +139,7 @@ const sendWallet = async (
     );
   }
 
-  if (senderId === receiverId && decodedToken.role !== Role.USER) {
+  if (senderId === isUserExist._id && decodedToken.role !== Role.USER) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       "You are not authorized! Only owner can send from their wallet!"
@@ -175,7 +177,7 @@ const sendWallet = async (
 
   const transaction = await Transaction.create({
     initiator: senderId,
-    recipient: receiverId,
+    recipient: isUserExist._id,
     type: TransactionType.SEND,
     amount,
     description: `Send ${amount} to wallet`,

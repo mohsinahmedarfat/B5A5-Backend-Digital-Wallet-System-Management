@@ -16,6 +16,15 @@ const getTransactions = () => __awaiter(void 0, void 0, void 0, function* () {
     const transactions = yield transaction_model_1.Transaction.find().populate("initiator recipient", "name email role isBlocked");
     return transactions;
 });
+const getTransactionMe = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const transaction = yield transaction_model_1.Transaction.find({
+        $or: [{ initiator: userId }, { recipient: userId }]
+    }).populate("initiator recipient", "email role");
+    return {
+        data: transaction,
+    };
+});
 exports.TransactionServices = {
-    getTransactions
+    getTransactions,
+    getTransactionMe
 };

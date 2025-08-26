@@ -43,13 +43,14 @@ const topUpWallet = catchAsync(
 
 const sendWallet = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const receiverId = req.params.receiverId;
+    // const receiverId = req.params.receiverId;
+    const receiverEmail = req.params.receiverEmail;
     const { amount } = req.body;
     const verifiedToken = req.user;
 
     // Call service to send from wallet
     const result = await WalletServices.sendWallet(
-      receiverId,
+      receiverEmail,
       amount,
       verifiedToken as JwtPayload
     );
