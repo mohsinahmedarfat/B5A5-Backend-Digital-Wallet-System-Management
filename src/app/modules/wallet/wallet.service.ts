@@ -105,7 +105,6 @@ const topUpWallet = async (
 };
 
 const sendWallet = async (
-  // receiverId: string,
   receiverEmail: string,
   amount: number,
   decodedToken: JwtPayload
@@ -168,6 +167,14 @@ const sendWallet = async (
     throw new AppError(
       httpStatus.FORBIDDEN,
       "Agent can not send money to anyone."
+    );
+  }
+  
+  // user can not send money to its account
+  if (decodedToken.email === receiverEmail) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "User can not send money to its account."
     );
   }
 

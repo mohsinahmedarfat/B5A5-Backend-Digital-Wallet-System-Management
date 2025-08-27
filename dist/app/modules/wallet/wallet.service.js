@@ -81,9 +81,7 @@ const topUpWallet = (userEmail, amount, decodedToken) => __awaiter(void 0, void 
         transaction,
     };
 });
-const sendWallet = (
-// receiverId: string,
-receiverEmail, amount, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
+const sendWallet = (receiverEmail, amount, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("userId from send wallet service", receiverEmail);
     console.log("decodedToken from send wallet service", decodedToken);
     const isUserExist = yield user_model_1.User.findOne({ email: receiverEmail });
@@ -120,6 +118,10 @@ receiverEmail, amount, decodedToken) => __awaiter(void 0, void 0, void 0, functi
     // agent can not send money to anyone
     if (decodedToken.role === user_interface_1.Role.AGENT) {
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "Agent can not send money to anyone.");
+    }
+    // user can not send money to its account
+    if (decodedToken.email === receiverEmail) {
+        throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "User can not send money to its account.");
     }
     // Validate amount
     if (amount <= 0 || amount > isSenderWalletExist.balance) {
