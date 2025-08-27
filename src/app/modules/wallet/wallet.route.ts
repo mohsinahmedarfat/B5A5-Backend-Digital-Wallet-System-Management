@@ -13,13 +13,13 @@ router.get(
 router.get("/me", checkAuth(...Object.values(Role)), WalletController.getWalletMe);
 
 router.patch(
-  "/top-up/:userId",
+  "/top-up/:userEmail",
   checkAuth(...Object.values(Role)),
   WalletController.topUpWallet
 );
 
 router.patch(
-  "/withdraw/:userId",
+  "/withdraw/:userEmail",
   checkAuth(...Object.values(Role)),
   WalletController.withdrawWallet
 );

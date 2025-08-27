@@ -25,11 +25,16 @@ const getWallets = () => __awaiter(void 0, void 0, void 0, function* () {
     const wallets = yield wallet_model_1.Wallet.find().populate("user", "name email role isBlocked");
     return wallets;
 });
-const topUpWallet = (userId, amount, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("userId from top up wallet service", userId);
+const topUpWallet = (userEmail, amount, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("userId from top up wallet service", userEmail);
     console.log("decodedToken from top up wallet service", decodedToken);
+    const isUserExist = yield user_model_1.User.findOne({ email: userEmail });
+    console.log("isUserExist", isUserExist);
+    if (!isUserExist) {
+        throw new Error("User does not exist.");
+    }
     // Find the receiver wallet by receiverId
-    const isReceiverWalletExist = yield wallet_model_1.Wallet.findOne({ user: userId });
+    const isReceiverWalletExist = yield wallet_model_1.Wallet.findOne({ user: isUserExist._id });
     if (!isReceiverWalletExist) {
         throw new Error("Receiver wallet not found.");
     }
@@ -45,11 +50,12 @@ const topUpWallet = (userId, amount, decodedToken) => __awaiter(void 0, void 0, 
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "Wallet is blocked. Cannot top up");
     }
     // only current user can update their own information
-    if (decodedToken.userId !== userId && decodedToken.role !== user_interface_1.Role.AGENT) {
+    if (decodedToken.userId !== isUserExist._id &&
+        decodedToken.role !== user_interface_1.Role.AGENT) {
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized! Only owner or agents can top-up to wallet!");
     }
     // agent (current user) can not update their wallet balance
-    if (decodedToken.userId === userId) {
+    if (decodedToken.userId === isUserExist._id) {
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You can not update your wallet balance!");
     }
     // Validate amount
@@ -64,7 +70,7 @@ const topUpWallet = (userId, amount, decodedToken) => __awaiter(void 0, void 0, 
     const receiverWallet = yield isReceiverWalletExist.save();
     const transaction = yield transaction_model_1.Transaction.create({
         initiator: agentId,
-        recipient: userId,
+        recipient: isUserExist._id,
         type: transaction_interface_1.TransactionType.TOP_UP,
         amount,
         description: `Top up ${amount} to wallet`,
@@ -138,11 +144,16 @@ receiverEmail, amount, decodedToken) => __awaiter(void 0, void 0, void 0, functi
         transaction,
     };
 });
-const withdrawWallet = (userId, amount, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("userId from top up wallet service", userId);
+const withdrawWallet = (userEmail, amount, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("userEmail from top up wallet service", userEmail);
     console.log("decodedToken from top up wallet service", decodedToken);
-    // Find the User wallet by UserId
-    const isUserWalletExist = yield wallet_model_1.Wallet.findOne({ user: userId });
+    const isUserExist = yield user_model_1.User.findOne({ email: userEmail });
+    console.log("isUserExist", isUserExist);
+    if (!isUserExist) {
+        throw new Error("User does not exist.");
+    }
+    // Find the User wallet by userEmail
+    const isUserWalletExist = yield wallet_model_1.Wallet.findOne({ user: isUserExist._id });
     if (!isUserWalletExist) {
         throw new Error("User wallet not found.");
     }
@@ -158,11 +169,11 @@ const withdrawWallet = (userId, amount, decodedToken) => __awaiter(void 0, void 
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "Wallet is blocked. Cannot top up");
     }
     // only current user can update their own information
-    if (decodedToken.userId !== userId && decodedToken.role !== user_interface_1.Role.AGENT) {
+    if (decodedToken.userId !== isUserExist._id && decodedToken.role !== user_interface_1.Role.AGENT) {
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized! Only owner or agents can withdraw from wallet!");
     }
     // agent (current user) can not update their wallet balance
-    if (decodedToken.userId === userId) {
+    if (decodedToken.userId === isUserExist._id) {
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You can not update your wallet balance!");
     }
     // Validate amount
@@ -176,7 +187,7 @@ const withdrawWallet = (userId, amount, decodedToken) => __awaiter(void 0, void 
     const agentWallet = yield isAgentWalletExist.save();
     const userWallet = yield isUserWalletExist.save();
     const transaction = yield transaction_model_1.Transaction.create({
-        initiator: userId,
+        initiator: isUserExist._id,
         recipient: agentId,
         type: transaction_interface_1.TransactionType.WITHDRAW,
         amount,

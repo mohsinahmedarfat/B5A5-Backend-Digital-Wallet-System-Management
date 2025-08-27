@@ -21,13 +21,13 @@ const getWallets = catchAsync(
 
 const topUpWallet = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.params.userId;
+    const userEmail = req.params.userEmail;    
     const { amount } = req.body;
     const verifiedToken = req.user;
 
     // Call service to top up wallet
     const result = await WalletServices.topUpWallet(
-      userId,
+      userEmail,
       amount,
       verifiedToken as JwtPayload
     );
@@ -43,7 +43,6 @@ const topUpWallet = catchAsync(
 
 const sendWallet = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // const receiverId = req.params.receiverId;
     const receiverEmail = req.params.receiverEmail;
     const { amount } = req.body;
     const verifiedToken = req.user;
@@ -66,13 +65,13 @@ const sendWallet = catchAsync(
 
 const withdrawWallet = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.params.userId;
+    const userEmail = req.params.userEmail;
     const { amount } = req.body;
     const verifiedToken = req.user;
 
     // Call service to withdraw from wallet
     const updatedWallet = await WalletServices.withdrawWallet(
-      userId,
+      userEmail,
       amount,
       verifiedToken as JwtPayload
     );

@@ -19,15 +19,21 @@ const getWallets = async () => {
 };
 
 const topUpWallet = async (
-  userId: string,
+  userEmail: string,
   amount: number,
   decodedToken: JwtPayload
 ) => {
-  console.log("userId from top up wallet service", userId);
+  console.log("userId from top up wallet service", userEmail);
   console.log("decodedToken from top up wallet service", decodedToken);
 
+  const isUserExist = await User.findOne({ email: userEmail });
+  console.log("isUserExist", isUserExist);
+  if (!isUserExist) {
+    throw new Error("User does not exist.");
+  }
+
   // Find the receiver wallet by receiverId
-  const isReceiverWalletExist = await Wallet.findOne({ user: userId });
+  const isReceiverWalletExist = await Wallet.findOne({ user: isUserExist._id });
   if (!isReceiverWalletExist) {
     throw new Error("Receiver wallet not found.");
   }
@@ -52,7 +58,10 @@ const topUpWallet = async (
   }
 
   // only current user can update their own information
-  if (decodedToken.userId !== userId && decodedToken.role !== Role.AGENT) {
+  if (
+    decodedToken.userId !== isUserExist._id &&
+    decodedToken.role !== Role.AGENT
+  ) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       "You are not authorized! Only owner or agents can top-up to wallet!"
@@ -60,7 +69,7 @@ const topUpWallet = async (
   }
 
   // agent (current user) can not update their wallet balance
-  if (decodedToken.userId === userId) {
+  if (decodedToken.userId === isUserExist._id) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       "You can not update your wallet balance!"
@@ -82,7 +91,7 @@ const topUpWallet = async (
 
   const transaction = await Transaction.create({
     initiator: agentId,
-    recipient: userId,
+    recipient: isUserExist._id,
     type: TransactionType.TOP_UP,
     amount,
     description: `Top up ${amount} to wallet`,
@@ -104,7 +113,7 @@ const sendWallet = async (
   console.log("userId from send wallet service", receiverEmail);
   console.log("decodedToken from send wallet service", decodedToken);
 
-  const isUserExist = await User.findOne({email: receiverEmail});
+  const isUserExist = await User.findOne({ email: receiverEmail });
   console.log(isUserExist);
   if (!isUserExist) {
     throw new Error("User does not exist.");
@@ -191,15 +200,21 @@ const sendWallet = async (
 };
 
 const withdrawWallet = async (
-  userId: string,
+  userEmail: string,
   amount: number,
   decodedToken: JwtPayload
 ) => {
-  console.log("userId from top up wallet service", userId);
+  console.log("userEmail from top up wallet service", userEmail);
   console.log("decodedToken from top up wallet service", decodedToken);
 
-  // Find the User wallet by UserId
-  const isUserWalletExist = await Wallet.findOne({ user: userId });
+  const isUserExist = await User.findOne({ email: userEmail });
+  console.log("isUserExist", isUserExist);
+  if (!isUserExist) {
+    throw new Error("User does not exist.");
+  }
+
+  // Find the User wallet by userEmail
+  const isUserWalletExist = await Wallet.findOne({ user: isUserExist._id });
   if (!isUserWalletExist) {
     throw new Error("User wallet not found.");
   }
@@ -224,7 +239,7 @@ const withdrawWallet = async (
   }
 
   // only current user can update their own information
-  if (decodedToken.userId !== userId && decodedToken.role !== Role.AGENT) {
+  if (decodedToken.userId !== isUserExist._id && decodedToken.role !== Role.AGENT) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       "You are not authorized! Only owner or agents can withdraw from wallet!"
@@ -232,7 +247,7 @@ const withdrawWallet = async (
   }
 
   // agent (current user) can not update their wallet balance
-  if (decodedToken.userId === userId) {
+  if (decodedToken.userId === isUserExist._id) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       "You can not update your wallet balance!"
@@ -253,7 +268,7 @@ const withdrawWallet = async (
   const userWallet = await isUserWalletExist.save();
 
   const transaction = await Transaction.create({
-    initiator: userId,
+    initiator: isUserExist._id,
     recipient: agentId,
     type: TransactionType.WITHDRAW,
     amount,
