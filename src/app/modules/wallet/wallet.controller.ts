@@ -65,13 +65,13 @@ const sendWallet = catchAsync(
 
 const withdrawWallet = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const userEmail = req.params.userEmail;
+    const agentEmail = req.params.agentEmail;
     const { amount } = req.body;
     const verifiedToken = req.user;
 
     // Call service to withdraw from wallet
     const updatedWallet = await WalletServices.withdrawWallet(
-      userEmail,
+      agentEmail,
       amount,
       verifiedToken as JwtPayload
     );

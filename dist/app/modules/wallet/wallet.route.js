@@ -12,7 +12,7 @@ const router = (0, express_1.Router)();
 router.get("/", (0, checkAuth_1.default)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), wallet_controller_1.WalletController.getWallets);
 router.get("/me", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.getWalletMe);
 router.patch("/top-up/:userEmail", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.topUpWallet);
-router.patch("/withdraw/:userEmail", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.withdrawWallet);
+router.patch("/withdraw/:agentEmail", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.withdrawWallet);
 router.patch("/send/:receiverEmail", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.sendWallet);
 router.patch("/status/:userId", (0, checkAuth_1.default)(...Object.values(user_interface_1.Role)), wallet_controller_1.WalletController.statusWallet);
 exports.WalletRoutes = router;

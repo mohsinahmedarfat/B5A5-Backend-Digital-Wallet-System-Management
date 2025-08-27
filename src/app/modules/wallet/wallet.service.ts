@@ -207,38 +207,46 @@ const sendWallet = async (
 };
 
 const withdrawWallet = async (
-  userEmail: string,
+  agentEmail: string,
   amount: number,
   decodedToken: JwtPayload
 ) => {
-  console.log("userEmail from top up wallet service", userEmail);
+  console.log("agentEmail from top up wallet service", agentEmail);
   console.log("decodedToken from top up wallet service", decodedToken);
 
-  const isUserExist = await User.findOne({ email: userEmail });
-  console.log("isUserExist", isUserExist);
-  if (!isUserExist) {
+  const isAgentExist = await User.findOne({ email: agentEmail });
+  console.log("isAgentExist", isAgentExist);
+  if (!isAgentExist) {
     throw new Error("User does not exist.");
   }
 
   // Find the User wallet by userEmail
-  const isUserWalletExist = await Wallet.findOne({ user: isUserExist._id });
-  if (!isUserWalletExist) {
+  const isAgentWalletExist = await Wallet.findOne({ user: isAgentExist._id });
+  if (!isAgentWalletExist) {
     throw new Error("User wallet not found.");
   }
   console.log(
     "isUserWalletExist from top up wallet service",
-    isUserWalletExist
+    isAgentWalletExist
   );
 
   // Find the agent wallet by userId
-  const agentId = decodedToken.userId;
-  const isAgentWalletExist = await Wallet.findOne({ user: agentId });
-  if (!isAgentWalletExist) {
+  const userId = decodedToken.userId;
+  const isUserWalletExist = await Wallet.findOne({ user: userId });
+  if (!isUserWalletExist) {
     throw new Error("Agent wallet not found.");
   }
 
-  // Check if the wallet is blocked
+  // Check if the user wallet is blocked
   if (isUserWalletExist.status === "BLOCKED") {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "Wallet is blocked. Cannot top up"
+    );
+  }
+  
+  // Check if the agent wallet is blocked
+  if (isAgentWalletExist.status === "BLOCKED") {
     throw new AppError(
       httpStatus.FORBIDDEN,
       "Wallet is blocked. Cannot top up"
@@ -246,15 +254,23 @@ const withdrawWallet = async (
   }
 
   // only current user can update their own information
-  if (decodedToken.userId !== isUserExist._id && decodedToken.role !== Role.AGENT) {
+  if (userId !== isAgentExist._id && decodedToken.role !== Role.USER) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       "You are not authorized! Only owner or agents can withdraw from wallet!"
     );
   }
 
+  // user can not withdraw money from a other user. user can only withdraw money from agent
+  if (decodedToken.role === Role.USER && isAgentExist.role === Role.USER) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "User can not withdraw money from another user."
+    );
+  }
+
   // agent (current user) can not update their wallet balance
-  if (decodedToken.userId === isUserExist._id) {
+  if (decodedToken.email === agentEmail) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       "You can not update your wallet balance!"
@@ -275,8 +291,8 @@ const withdrawWallet = async (
   const userWallet = await isUserWalletExist.save();
 
   const transaction = await Transaction.create({
-    initiator: isUserExist._id,
-    recipient: agentId,
+    initiator: userId,
+    recipient: isAgentExist._id,
     type: TransactionType.WITHDRAW,
     amount,
     description: `Withdraw ${amount} to wallet`,

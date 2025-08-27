@@ -19,7 +19,7 @@ router.patch(
 );
 
 router.patch(
-  "/withdraw/:userEmail",
+  "/withdraw/:agentEmail",
   checkAuth(...Object.values(Role)),
   WalletController.withdrawWallet
 );

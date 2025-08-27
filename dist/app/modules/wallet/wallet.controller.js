@@ -53,11 +53,11 @@ const sendWallet = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 
     });
 }));
 const withdrawWallet = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const userEmail = req.params.userEmail;
+    const agentEmail = req.params.agentEmail;
     const { amount } = req.body;
     const verifiedToken = req.user;
     // Call service to withdraw from wallet
-    const updatedWallet = yield wallet_service_1.WalletServices.withdrawWallet(userEmail, amount, verifiedToken);
+    const updatedWallet = yield wallet_service_1.WalletServices.withdrawWallet(agentEmail, amount, verifiedToken);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.default.OK,
