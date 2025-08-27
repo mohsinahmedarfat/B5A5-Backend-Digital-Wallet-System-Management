@@ -46,21 +46,32 @@ const getNewAccessToken = (0, catchAsync_1.default)((req, res, next) => __awaite
     });
 }));
 const logout = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    res.clearCookie("accessToken", {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-    });
-    res.clearCookie("refreshToken", {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-    });
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_codes_1.default.OK,
-        success: true,
-        message: "User logged out successfully!",
-        data: null,
+    var _a;
+    // Destroy session if using express-session
+    (_a = req.session) === null || _a === void 0 ? void 0 : _a.destroy((err) => {
+        if (err) {
+            return next(err);
+        }
+        const isProd = process.env.NODE_ENV === "production";
+        // Clear cookies with exact options used when setting them
+        res.clearCookie("accessToken", {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            path: "/",
+        });
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            path: "/",
+        });
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.default.OK,
+            success: true,
+            message: "User logged out successfully!",
+            data: null,
+        });
     });
 }));
 const googleCallback = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {

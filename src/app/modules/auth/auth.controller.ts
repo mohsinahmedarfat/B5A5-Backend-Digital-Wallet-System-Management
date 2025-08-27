@@ -50,23 +50,36 @@ const getNewAccessToken = catchAsync(
 
 const logout = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    res.clearCookie("accessToken", {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
 
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
+    // Destroy session if using express-session
+    req.session?.destroy((err) => {
+      if (err) {
+        return next(err);
+      }
 
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: "User logged out successfully!",
-      data: null,
+      const isProd = process.env.NODE_ENV === "production";
+
+      // Clear cookies with exact options used when setting them
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+        path: "/",
+      });
+
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+        path: "/",
+      });
+
+      sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "User logged out successfully!",
+        data: null,
+      });
     });
   }
 );
