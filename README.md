@@ -1,4 +1,4 @@
-# 💸 Digital Wallet System Management API
+# 💸 WalletX - Digital Wallet System Management API
 
 A RESTful API built using **Node.js**, **Express**, **TypeScript**, and **MongoDB** to manage a secure digital wallet platform. This system allows users to register, manage wallets, perform transactions (top-up, withdraw, send), and provides admin functionalities to control wallet statuses.
 
