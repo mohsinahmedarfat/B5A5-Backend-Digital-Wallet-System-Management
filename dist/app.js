@@ -24,7 +24,7 @@ app.use(passport_1.default.session());
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({
     origin: [
-        "https://digital-wallet-system-management.vercel.app",
+        "https://walletx-digital-wallet-system-management.vercel.app",
         "http://localhost:5173",
     ],
     credentials: true,
