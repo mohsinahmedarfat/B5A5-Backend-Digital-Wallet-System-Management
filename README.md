@@ -27,8 +27,8 @@ This project simulates the backend of a digital wallet system with the following
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/digital-wallet-api.git
-cd digital-wallet-api
+git clone https://github.com/mohsinahmedarfat/WalletX-backend.git
+cd walletx-backend
 ```
 ### 2. Install dependencies
 ```bash
