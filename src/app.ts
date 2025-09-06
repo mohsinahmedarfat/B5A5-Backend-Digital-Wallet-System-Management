@@ -34,7 +34,7 @@ app.use(
 app.use("/api/v1", router);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Welcome to Digital Wallet System Management.");
+  res.send("Welcome to WalletX - Digital Wallet System Management.");
 });
 
 app.use(notFound);

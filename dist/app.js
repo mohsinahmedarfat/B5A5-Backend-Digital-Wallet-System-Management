@@ -31,7 +31,7 @@ app.use((0, cors_1.default)({
 }));
 app.use("/api/v1", routes_1.router);
 app.get("/", (req, res) => {
-    res.send("Welcome to Digital Wallet System Management.");
+    res.send("Welcome to WalletX - Digital Wallet System Management.");
 });
 app.use(notFound_1.default);
 app.use(globalErrorHandler_1.globalErrorHandler);
