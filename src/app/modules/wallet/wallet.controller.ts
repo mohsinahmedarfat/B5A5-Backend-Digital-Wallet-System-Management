@@ -19,15 +19,38 @@ const getWallets = catchAsync(
   }
 );
 
-const topUpWallet = catchAsync(
+const topUpUserWallet = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userEmail = req.params.userEmail;    
     const { amount } = req.body;
     const verifiedToken = req.user;
 
     // Call service to top up wallet
-    const result = await WalletServices.topUpWallet(
+    const result = await WalletServices.topUpUserWallet(
       userEmail,
+      amount,
+      verifiedToken as JwtPayload
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Wallet topped up successfully.",
+      data: result,
+    });
+  }
+);
+
+const topUpAgentWallet = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const agentEmail = req.params.agentEmail;    
+    console.log("agentEmail-",agentEmail);
+    const { amount } = req.body;
+    const verifiedToken = req.user;
+
+    // Call service to top up wallet
+    const result = await WalletServices.topUpAgentWallet(
+      agentEmail,
       amount,
       verifiedToken as JwtPayload
     );
@@ -122,7 +145,8 @@ const getWalletMe = catchAsync(async (req: Request, res: Response, next: NextFun
 
 export const WalletController = {
   getWallets,
-  topUpWallet,
+  topUpUserWallet,
+  topUpAgentWallet,
   withdrawWallet,
   statusWallet,
   sendWallet,

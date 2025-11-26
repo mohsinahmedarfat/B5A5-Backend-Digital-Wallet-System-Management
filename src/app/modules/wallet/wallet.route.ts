@@ -13,9 +13,15 @@ router.get(
 router.get("/me", checkAuth(...Object.values(Role)), WalletController.getWalletMe);
 
 router.patch(
-  "/top-up/:userEmail",
+  "/top-up/user/:userEmail",
   checkAuth(...Object.values(Role)),
-  WalletController.topUpWallet
+  WalletController.topUpUserWallet
+);
+
+router.patch(
+  "/top-up/agent/:agentEmail",
+  checkAuth(...Object.values(Role)),
+  WalletController.topUpAgentWallet
 );
 
 router.patch(

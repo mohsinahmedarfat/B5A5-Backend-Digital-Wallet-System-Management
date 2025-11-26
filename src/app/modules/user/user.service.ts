@@ -92,7 +92,6 @@ const updateUser = async (
       httpStatus.FORBIDDEN,
       "You can only change your info. Not others!"
     );
-    // throw new AppError(httpStatus.FORBIDDEN, "You are not authorized!");
   }
 
   // Check if the user is trying to change approval status
@@ -103,12 +102,12 @@ const updateUser = async (
     ) {
       throw new AppError(
         httpStatus.FORBIDDEN,
-        "You are not authorized to change approval status to APPROVED or SUSPENDED!"
+        "You are not authorized to change approval status to Approved or Suspended!"
       );
     }
 
     // Auto-update role based on approvalStatus
-    if (payload.approvalStatus === "APPROVED" || payload.approvalStatus === "SUSPENDED") {
+    if (payload.approvalStatus === ApprovalStatus.APPROVED || payload.approvalStatus === ApprovalStatus.SUSPENDED) {
       // Admin approves request
       payload.role = Role.AGENT;
     }

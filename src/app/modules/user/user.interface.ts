@@ -8,9 +8,9 @@ export enum Role {
 }
 
 export enum ApprovalStatus {
-  PENDING = "PENDING",
-  APPROVED = "APPROVED",
-  SUSPENDED = "SUSPENDED",
+  PENDING = "pending",
+  APPROVED = "approved",
+  SUSPENDED = "suspended",
 }
 
 export interface IAuthProvider {
@@ -27,7 +27,7 @@ export interface IUser {
   picture?: string;
   address?: string;
   role: Role; // "USER" | "AGENT" | "ADMIN"
-  approvalStatus?: ApprovalStatus // "PENDING" | "APPROVED" | "SUSPENDED"
+  approvalStatus?: ApprovalStatus // "pending" | "approved" | "suspended"
   isBlocked: boolean; // default: false
   auths: IAuthProvider[];
   wallet?: Types.ObjectId; // reference to Wallet

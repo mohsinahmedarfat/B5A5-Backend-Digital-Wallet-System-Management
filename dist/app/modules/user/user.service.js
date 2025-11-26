@@ -57,6 +57,7 @@ const getUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield user_model_1.User.find();
     return users;
 });
+
 const updateUser = (userId, payload, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("payload from update user service", payload);
     console.log("decodedToken from update user service", decodedToken);
