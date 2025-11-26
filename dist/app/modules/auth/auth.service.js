@@ -24,6 +24,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthServices = void 0;
+/* eslint-disable @typescript-eslint/no-unused-vars */
+const user_interface_1 = require("../user/user.interface");
 const user_model_1 = require("../user/user.model");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -39,7 +41,7 @@ const credentialsLogin = (payload) => __awaiter(void 0, void 0, void 0, function
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "User is blocked!");
     }
     // if agent is suspended, it can't login
-    if (isUserExist.approvalStatus === "SUSPENDED") {
+    if (isUserExist.approvalStatus === user_interface_1.ApprovalStatus.SUSPENDED) {
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "Agent is suspended! Contact admin.");
     }
     const isPasswordMatch = yield bcryptjs_1.default.compare(password, isUserExist.password);

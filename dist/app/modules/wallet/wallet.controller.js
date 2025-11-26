@@ -26,12 +26,26 @@ const getWallets = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 
         data: wallets,
     });
 }));
-const topUpWallet = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const topUpUserWallet = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const userEmail = req.params.userEmail;
     const { amount } = req.body;
     const verifiedToken = req.user;
     // Call service to top up wallet
-    const result = yield wallet_service_1.WalletServices.topUpWallet(userEmail, amount, verifiedToken);
+    const result = yield wallet_service_1.WalletServices.topUpUserWallet(userEmail, amount, verifiedToken);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.OK,
+        message: "Wallet topped up successfully.",
+        data: result,
+    });
+}));
+const topUpAgentWallet = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const agentEmail = req.params.agentEmail;
+    console.log("agentEmail-", agentEmail);
+    const { amount } = req.body;
+    const verifiedToken = req.user;
+    // Call service to top up wallet
+    const result = yield wallet_service_1.WalletServices.topUpAgentWallet(agentEmail, amount, verifiedToken);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.default.OK,
@@ -90,7 +104,8 @@ const getWalletMe = (0, catchAsync_1.default)((req, res, next) => __awaiter(void
 }));
 exports.WalletController = {
     getWallets,
-    topUpWallet,
+    topUpUserWallet,
+    topUpAgentWallet,
     withdrawWallet,
     statusWallet,
     sendWallet,

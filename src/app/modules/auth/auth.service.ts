@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { IUser } from "../user/user.interface";
+import { IUser, ApprovalStatus } from "../user/user.interface";
 import { User } from "../user/user.model";
 import httpStatus from "http-status-codes";
 import bcrypt from "bcryptjs";
@@ -22,9 +22,9 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
   }
 
   // if agent is suspended, it can't login
-  if (isUserExist.approvalStatus === "SUSPENDED") {
-    throw new AppError(httpStatus.FORBIDDEN, "Agent is suspended! Contact admin.");
-  }
+    if (isUserExist.approvalStatus === ApprovalStatus.SUSPENDED) {
+      throw new AppError(httpStatus.FORBIDDEN, "Agent is suspended! Contact admin.");
+    }
 
   const isPasswordMatch = await bcrypt.compare(
     password as string,

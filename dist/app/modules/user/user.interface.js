@@ -10,7 +10,7 @@ var Role;
 })(Role || (exports.Role = Role = {}));
 var ApprovalStatus;
 (function (ApprovalStatus) {
-    ApprovalStatus["PENDING"] = "PENDING";
-    ApprovalStatus["APPROVED"] = "APPROVED";
-    ApprovalStatus["SUSPENDED"] = "SUSPENDED";
+    ApprovalStatus["PENDING"] = "pending";
+    ApprovalStatus["APPROVED"] = "approved";
+    ApprovalStatus["SUSPENDED"] = "suspended";
 })(ApprovalStatus || (exports.ApprovalStatus = ApprovalStatus = {}));

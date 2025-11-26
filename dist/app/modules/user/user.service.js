@@ -57,7 +57,6 @@ const getUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield user_model_1.User.find();
     return users;
 });
-
 const updateUser = (userId, payload, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("payload from update user service", payload);
     console.log("decodedToken from update user service", decodedToken);
@@ -85,16 +84,15 @@ const updateUser = (userId, payload, decodedToken) => __awaiter(void 0, void 0, 
         decodedToken.role !== user_interface_1.Role.SUPER_ADMIN &&
         decodedToken.role !== user_interface_1.Role.ADMIN) {
         throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You can only change your info. Not others!");
-        // throw new AppError(httpStatus.FORBIDDEN, "You are not authorized!");
     }
     // Check if the user is trying to change approval status
     if (payload.approvalStatus) {
         if (payload.approvalStatus !== user_interface_1.ApprovalStatus.PENDING &&
             decodedToken.role === user_interface_1.Role.USER) {
-            throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized to change approval status to APPROVED or SUSPENDED!");
+            throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized to change approval status to Approved or Suspended!");
         }
         // Auto-update role based on approvalStatus
-        if (payload.approvalStatus === "APPROVED" || payload.approvalStatus === "SUSPENDED") {
+        if (payload.approvalStatus === user_interface_1.ApprovalStatus.APPROVED || payload.approvalStatus === user_interface_1.ApprovalStatus.SUSPENDED) {
             // Admin approves request
             payload.role = user_interface_1.Role.AGENT;
         }

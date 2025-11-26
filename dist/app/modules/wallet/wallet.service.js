@@ -25,9 +25,9 @@ const getWallets = () => __awaiter(void 0, void 0, void 0, function* () {
     const wallets = yield wallet_model_1.Wallet.find().populate("user", "name email role isBlocked");
     return wallets;
 });
-const topUpWallet = (userEmail, amount, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("userId from top up wallet service", userEmail);
-    console.log("decodedToken from top up wallet service", decodedToken);
+const topUpUserWallet = (userEmail, amount, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("userId from top up user wallet service", userEmail);
+    console.log("decodedToken from top up user wallet service", decodedToken);
     const isUserExist = yield user_model_1.User.findOne({ email: userEmail });
     console.log("isUserExist", isUserExist);
     if (!isUserExist) {
@@ -52,7 +52,7 @@ const topUpWallet = (userEmail, amount, decodedToken) => __awaiter(void 0, void 
     // only current user can update their own information
     if (decodedToken.userId !== isUserExist._id &&
         decodedToken.role !== user_interface_1.Role.AGENT) {
-        throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized! Only owner or agents can top-up to wallet!");
+        throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized! Only agents can top-up to users wallet!");
     }
     // agent (current user) can not update their wallet balance
     if (decodedToken.userId === isUserExist._id) {
@@ -78,6 +78,62 @@ const topUpWallet = (userEmail, amount, decodedToken) => __awaiter(void 0, void 
     return {
         agentWallet,
         receiverWallet,
+        transaction,
+    };
+});
+const topUpAgentWallet = (agentEmail, amount, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("agentId from top up agent wallet service", agentEmail);
+    console.log("decodedToken from top up agent wallet service", decodedToken);
+    const isAgentExist = yield user_model_1.User.findOne({ email: agentEmail });
+    console.log("isAgentExist from top up agent wallet service", isAgentExist);
+    if (!isAgentExist) {
+        throw new Error("Agent does not exist.");
+    }
+    // Find the receiver wallet by receiverId
+    const isAgentWalletExist = yield wallet_model_1.Wallet.findOne({ user: isAgentExist._id });
+    if (!isAgentWalletExist) {
+        throw new Error("Agent wallet not found.");
+    }
+    console.log("isAgentWalletExist from top up agent wallet service", isAgentWalletExist);
+    // Find the admin wallet by userId
+    const adminId = decodedToken.userId;
+    const isAdminWalletExist = yield wallet_model_1.Wallet.findOne({ user: adminId });
+    if (!isAdminWalletExist) {
+        throw new Error("Admin wallet not found.");
+    }
+    // Check if receiver the wallet is blocked
+    if (isAgentWalletExist.status === "BLOCKED") {
+        throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "Agent wallet is blocked. Cannot top up");
+    }
+    // only current user can update their own information
+    if (adminId !== isAgentExist._id &&
+        decodedToken.role !== user_interface_1.Role.ADMIN) {
+        throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized! Only admins can top-up to agents wallet!");
+    }
+    // agent (current user) can not update their wallet balance
+    if (adminId === isAgentExist._id) {
+        throw new appError_1.default(http_status_codes_1.default.FORBIDDEN, "You can not update your wallet balance!");
+    }
+    // Validate amount
+    if (amount <= 0 || amount > isAdminWalletExist.balance) {
+        throw new Error("Invalid send amount.");
+    }
+    // Update the wallet balance
+    isAdminWalletExist.balance -= amount;
+    isAgentWalletExist.balance += amount;
+    // Save the updated wallet
+    const adminWallet = yield isAdminWalletExist.save();
+    const agentWallet = yield isAgentWalletExist.save();
+    const transaction = yield transaction_model_1.Transaction.create({
+        initiator: adminId,
+        recipient: isAgentExist._id,
+        type: transaction_interface_1.TransactionType.TOP_UP,
+        amount,
+        description: `Top up ${amount} to wallet`,
+    });
+    return {
+        adminWallet,
+        agentWallet,
         transaction,
     };
 });
@@ -236,7 +292,8 @@ const getWalletMe = (userId) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.WalletServices = {
     getWallets,
-    topUpWallet,
+    topUpUserWallet,
+    topUpAgentWallet,
     withdrawWallet,
     statusWallet,
     sendWallet,
