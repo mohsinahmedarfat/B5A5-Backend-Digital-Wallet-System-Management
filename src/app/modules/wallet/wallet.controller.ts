@@ -137,7 +137,7 @@ const getWalletMe = catchAsync(async (req: Request, res: Response, next: NextFun
 
     sendResponse(res, {
         success: true,
-        statusCode: httpStatus.CREATED,
+        statusCode: httpStatus.OK,
         message: "Your Wallet Retrieved Successfully",
         data: result.data
     })

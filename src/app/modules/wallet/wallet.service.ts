@@ -7,6 +7,7 @@ import { WalletStatus } from "./wallet.interface";
 import { Transaction } from "../transaction/transaction.model";
 import { TransactionType } from "../transaction/transaction.interface";
 import { User } from "../user/user.model";
+import { Notification } from "../notification/notification.model";
 
 const getWallets = async () => {
   // populate the user field with user details
@@ -97,10 +98,16 @@ const topUpUserWallet = async (
     description: `Top up ${amount} to wallet`,
   });
 
+  const notification = await Notification.create({
+    user: isUserExist._id,
+    message: `You have received ${amount} in your wallet from ${decodedToken.email}.`,
+  })
+
   return {
     agentWallet,
     receiverWallet,
     transaction,
+    notification
   };
 };
 
@@ -285,10 +292,16 @@ const sendWallet = async (
     description: `Send ${amount} to wallet`,
   });
 
+  const notification = await Notification.create({
+    user: isUserExist._id,
+    message: `You have received ${amount} in your wallet from ${decodedToken.email}.`,
+  })
+
   return {
     senderWallet,
     receiverWallet,
     transaction,
+    notification
   };
 };
 
@@ -384,10 +397,16 @@ const withdrawWallet = async (
     description: `Withdraw ${amount} to wallet`,
   });
 
+  const notification = await Notification.create({
+    user: isAgentExist._id,
+    message: `You have received ${amount} in your wallet from ${decodedToken.email}.`,
+  })
+
   return {
     agentWallet,
     userWallet,
     transaction,
+    notification
   };
 };
 
